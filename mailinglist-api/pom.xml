@@ -32,6 +32,22 @@
   <description>Mailing list API</description>
 
   <dependencies>
+  <dependency>
+    <groupId>org.xwiki.commons</groupId>
+    <artifactId>xwiki-commons-component-api</artifactId>
+    <version>${commons.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.xwiki.commons</groupId>
+    <artifactId>xwiki-commons-script</artifactId>
+    <version>${commons.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.xwiki.commons</groupId>
+    <artifactId>xwiki-commons-configuration-api</artifactId>
+    <version>${commons.version}</version>
+  </dependency>
+ 
     
   </dependencies>
   

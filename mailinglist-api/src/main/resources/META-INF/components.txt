@@ -1,0 +1,2 @@
+org.xwiki.contrib.mailinglist.interval.DefaultMailingListManager
+org.xwiki.contrib.mailinglist.MailingListScriptService
