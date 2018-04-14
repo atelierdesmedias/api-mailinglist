@@ -100,7 +100,7 @@ public class OVHMailingListConnector implements MailingListConnector
         throws MailingListException
     {
         try {
-            exec(profileConfiguration, mailingList, email, "delete", null);
+            exec(profileConfiguration, mailingList, email, "delete", "");
         } catch (Exception e) {
             throw new MailingListException("Failed to delete member", e);
         }
