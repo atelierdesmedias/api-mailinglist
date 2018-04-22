@@ -113,7 +113,7 @@ public class OVHMailingListConnector implements MailingListConnector
         String appKey = profileConfiguration.get("appKey");
         String appSecret = profileConfiguration.get("appSecret");
         String httpMethod = METHOD.get(method);
-        String consumerKey = profileConfiguration.get("consumerKey." + httpMethod);
+        String consumerKey = profileConfiguration.get("consumerKey");
         String endpoint = profileConfiguration.get("endpoint");
 
         Matcher matcher = MAIL_REGEX.matcher(mailingList);
