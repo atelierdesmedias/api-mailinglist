@@ -35,5 +35,6 @@
 
   <modules>
     <module>mailinglist-connector-ovh</module>
+    <module>mailinglist-connector-discourse</module>
   </modules>
 </project>
