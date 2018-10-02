@@ -1,1 +1,2 @@
 org.xwiki.contrib.mailinglist.ovh.internal.OVHMailingListConnector
+org.xwiki.contrib.mailinglist.ovh.internal.OVHRedirectMailingListConnector

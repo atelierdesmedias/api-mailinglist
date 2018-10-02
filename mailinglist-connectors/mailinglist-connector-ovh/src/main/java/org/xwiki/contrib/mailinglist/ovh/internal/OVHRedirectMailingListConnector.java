@@ -19,7 +19,9 @@
  */
 package org.xwiki.contrib.mailinglist.ovh.internal;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Named;
@@ -35,27 +37,53 @@ import org.xwiki.contrib.mailinglist.MailingListException;
  */
 @Component
 @Singleton
-@Named("ovh")
-public class OVHMailingListConnector extends AbstractOVHMailingListConnector
+@Named("ovh-redirect")
+public class OVHRedirectMailingListConnector extends AbstractOVHMailingListConnector
 {
     /**
      * Default constructor.
      */
-    public OVHMailingListConnector()
+    public OVHRedirectMailingListConnector()
     {
-        super("/email/domain/{0}/mailingList/{1}/subscriber", "/email/domain/{0}/mailingList/{1}/subscriber/{2}");
+        super("/email/domain/{0}/redirection", "/email/domain/{0}/redirection/{2}");
+
+        this.paths.put(METHOD_GET, "/email/domain/{0}/redirection");
     }
 
     @Override
     public void add(Map<String, String> profileConfiguration, String mailingList, String email)
         throws MailingListException
     {
-        Map<String, Object> body = Collections.singletonMap("email", email);
+        Map<String, Object> body = new HashMap<>();
+        body.put("from", mailingList);
+        body.put("localCopy", false);
+        body.put("to", email);
 
         try {
             exec(profileConfiguration, mailingList, email, METHOD_ADD, body);
         } catch (Exception e) {
             throw new MailingListException("Failed add delete member", e);
+        }
+    }
+
+    @Override
+    protected String getPath(Map<String, String> profileConfiguration, String method, String domain, String name,
+        String email) throws NoSuchAlgorithmException, IOException
+    {
+        if (method.equals(METHOD_DELETE)) {
+            // Find the id of the redirect (needed by delete)
+            Map<String, Object> body = new HashMap<>();
+            body.put("from", name);
+            body.put("to", email);
+            String result = exec(profileConfiguration, domain, name, email, METHOD_GET, body);
+
+            // TODO
+            String id = "";
+
+            // Generate the path
+            return super.getPath(profileConfiguration, method, domain, name, id);
+        } else {
+            return super.getPath(profileConfiguration, method, domain, name, email);
         }
     }
 }

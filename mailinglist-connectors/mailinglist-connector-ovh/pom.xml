@@ -21,39 +21,33 @@
 -->
 
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.xwiki.contrib.mailinglist</groupId>
-		<artifactId>mailinglist-connectors</artifactId>
-		<version>1.0-SNAPSHOT</version>
-	</parent>
-	<artifactId>mailinglist-connectors-ovh</artifactId>
-	<name>Mailing list - Connectors - OVH</name>
-	<description>Mailing list connector for OVH</description>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.xwiki.contrib.mailinglist</groupId>
+    <artifactId>mailinglist-connectors</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>mailinglist-connectors-ovh</artifactId>
+  <name>Mailing list - Connectors - OVH</name>
+  <description>Mailing list connector for OVH</description>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.xwiki.contrib.mailinglist</groupId>
-			<artifactId>mailinglist-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-	</dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>org.xwiki.contrib.mailinglist</groupId>
+      <artifactId>mailinglist-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
-	<build>
-		<plugins>
-			<plugin>
-				<!-- Apply the Checkstyle configurations defined in the top level pom.xml 
-					file -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<configuration>
-					<excludes>
-						org/xwiki/contrib/mailinglist/ovh/**.java,
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+  </dependencies>
 </project>
