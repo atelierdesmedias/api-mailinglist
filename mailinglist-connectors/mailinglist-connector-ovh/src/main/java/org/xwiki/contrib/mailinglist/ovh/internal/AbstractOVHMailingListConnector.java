@@ -20,6 +20,7 @@
 package org.xwiki.contrib.mailinglist.ovh.internal;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -89,7 +90,7 @@ public abstract class AbstractOVHMailingListConnector implements MailingListConn
             URLEncoder.encode(name, "UTF8"), URLEncoder.encode(email, "UTF8"));
     }
 
-    protected String exec(Map<String, String> profileConfiguration, String mailingList, String email, String method,
+    protected <T> T exec(Map<String, String> profileConfiguration, String mailingList, String email, String method,
         Map<String, Object> body) throws NoSuchAlgorithmException, IOException
     {
         // Extract mailing list domain and name
@@ -99,8 +100,8 @@ public abstract class AbstractOVHMailingListConnector implements MailingListConn
         return exec(profileConfiguration, matcher.group(2), matcher.group(1), email, method, body);
     }
 
-    protected String exec(Map<String, String> profileConfiguration, String listDomain, String listName, String email,
-        String method, Map<String, Object> body) throws NoSuchAlgorithmException, IOException
+    protected <T> T exec(Map<String, String> profileConfiguration, String listDomain, String listName, String email,
+        String method, Map<String, Object> bodyMap) throws NoSuchAlgorithmException, IOException
     {
         // define base vars
         String appKey = profileConfiguration.get("appKey");
@@ -109,9 +110,31 @@ public abstract class AbstractOVHMailingListConnector implements MailingListConn
         String consumerKey = profileConfiguration.get("consumerKey");
         String endpoint = profileConfiguration.get("endpoint");
 
-        String path = getPath(profileConfiguration, httpMethod, listDomain, listName, email);
+        String path = getPath(profileConfiguration, method, listDomain, listName, email);
 
-        URL url = new URL(new StringBuilder(endpoint).append(path).toString());
+        String body = "";
+        StringBuilder urlBuilder = new StringBuilder(endpoint);
+        urlBuilder.append(path);
+        if (httpMethod.equals("GET")) {
+            // Put parameters in the URL
+            if (bodyMap != null && !bodyMap.isEmpty()) {
+                urlBuilder.append('?');
+                for (Map.Entry<String, Object> entry : bodyMap.entrySet()) {
+                    urlBuilder.append(entry.getKey());
+                    urlBuilder.append('=');
+                    urlBuilder.append(URLEncoder.encode(entry.getValue().toString(), "UTF8"));
+                    urlBuilder.append('&');
+                }
+            }
+        } else {
+            // Put parameters in the body
+            if (bodyMap != null && !bodyMap.isEmpty()) {
+                ObjectMapper mapper = new ObjectMapper();
+                body = mapper.writeValueAsString(bodyMap);
+            }
+        }
+
+        URL url = new URL(urlBuilder.toString());
 
         // get timestamp from local system
         long timestamp = System.currentTimeMillis() / 1000;
@@ -135,12 +158,13 @@ public abstract class AbstractOVHMailingListConnector implements MailingListConn
         request.setRequestProperty("X-Ovh-Signature", signature);
         request.setRequestProperty("X-Ovh-Timestamp", Long.toString(timestamp));
 
-        // Serialize body
+        // Send body
         if (body != null && !body.isEmpty()) {
             request.setDoOutput(true);
-
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.writeValue(request.getOutputStream(), body);
+            DataOutputStream out = new DataOutputStream(request.getOutputStream());
+            out.writeBytes(body);
+            out.flush();
+            out.close();
         }
 
         BufferedReader in;
@@ -165,7 +189,9 @@ public abstract class AbstractOVHMailingListConnector implements MailingListConn
             throw new IOException(responseBody);
         }
 
-        return responseBody;
+        // Parse response body
+        ObjectMapper objectMapper = new ObjectMapper();
+        return (T) objectMapper.readValue(responseBody, Object.class);
     }
 
     private String toHashSHA1(String text) throws NoSuchAlgorithmException, UnsupportedEncodingException

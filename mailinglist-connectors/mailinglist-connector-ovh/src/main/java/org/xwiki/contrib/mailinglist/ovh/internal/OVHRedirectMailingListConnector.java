@@ -22,6 +22,7 @@ package org.xwiki.contrib.mailinglist.ovh.internal;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Named;
@@ -62,7 +63,7 @@ public class OVHRedirectMailingListConnector extends AbstractOVHMailingListConne
         try {
             exec(profileConfiguration, mailingList, email, METHOD_ADD, body);
         } catch (Exception e) {
-            throw new MailingListException("Failed add delete member", e);
+            throw new MailingListException("Failed add member", e);
         }
     }
 
@@ -73,12 +74,11 @@ public class OVHRedirectMailingListConnector extends AbstractOVHMailingListConne
         if (method.equals(METHOD_DELETE)) {
             // Find the id of the redirect (needed by delete)
             Map<String, Object> body = new HashMap<>();
-            body.put("from", name);
+            body.put("from", name + '@' + domain);
             body.put("to", email);
-            String result = exec(profileConfiguration, domain, name, email, METHOD_GET, body);
+            List<String> result = exec(profileConfiguration, domain, name, email, METHOD_GET, body);
 
-            // TODO
-            String id = "";
+            String id = result.get(0);
 
             // Generate the path
             return super.getPath(profileConfiguration, method, domain, name, id);
