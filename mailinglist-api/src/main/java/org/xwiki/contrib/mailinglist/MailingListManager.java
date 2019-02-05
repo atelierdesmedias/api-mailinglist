@@ -19,14 +19,19 @@
  */
 package org.xwiki.contrib.mailinglist;
 
+import java.util.List;
+
 import org.xwiki.component.annotation.Role;
 
+/**
+ * @version $Id$
+ */
 @Role
 public interface MailingListManager
 {
-
     void add(String profile, String mailingList, String email) throws MailingListException;
 
     void delete(String profile, String mailingList, String email) throws MailingListException;
 
+    List<String> getMembers(String profile, String mailingList) throws MailingListException;
 }

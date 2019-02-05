@@ -19,16 +19,20 @@
  */
 package org.xwiki.contrib.mailinglist;
 
+import java.util.List;
 import java.util.Map;
 
 import org.xwiki.component.annotation.Role;
 
+/**
+ * @version $Id$
+ */
 @Role
 public interface MailingListConnector
 {
-
     void add(Map<String, String> profileConfiguration, String mailingList, String email) throws MailingListException;
 
     void delete(Map<String, String> profileConfiguration, String mailingList, String email) throws MailingListException;
 
+    List<String> getMembers(Map<String, String> profileConfiguration, String mailingList) throws MailingListException;
 }

@@ -19,6 +19,11 @@
  */
 package org.xwiki.contrib.mailinglist;
 
+/**
+ * Base exception used by the module.
+ * 
+ * @version $Id$
+ */
 public class MailingListException extends Exception
 {
     /**

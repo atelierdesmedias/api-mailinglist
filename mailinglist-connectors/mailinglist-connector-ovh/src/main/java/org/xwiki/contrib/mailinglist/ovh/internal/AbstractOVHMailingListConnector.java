@@ -31,6 +31,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,19 +57,18 @@ public abstract class AbstractOVHMailingListConnector implements MailingListConn
 
     private static final Pattern MAIL_REGEX = Pattern.compile("(.*)@(.*)");
 
-    private static final Map<String, String> METHODS = new HashMap<>();
+    protected final Map<String, String> methods = new HashMap<>();
 
     protected final Map<String, String> paths = new HashMap<>();
 
-    static {
-        METHODS.put(METHOD_GET, "GET");
-        METHODS.put(METHOD_ADD, "POST");
-        METHODS.put(METHOD_DELETE, "DELETE");
-    }
-
-    public AbstractOVHMailingListConnector(String addPath, String deletePath)
+    public AbstractOVHMailingListConnector(String getaddPath, String deletePath)
     {
-        this.paths.put(METHOD_ADD, addPath);
+        this.methods.put(METHOD_GET, "GET");
+        this.methods.put(METHOD_ADD, "POST");
+        this.methods.put(METHOD_DELETE, "DELETE");
+
+        this.paths.put(METHOD_GET, getaddPath);
+        this.paths.put(METHOD_ADD, getaddPath);
         this.paths.put(METHOD_DELETE, deletePath);
     }
 
@@ -83,15 +83,36 @@ public abstract class AbstractOVHMailingListConnector implements MailingListConn
         }
     }
 
-    protected String getPath(Map<String, String> profileConfiguration, String method, String domain, String name,
-        String email) throws UnsupportedEncodingException, NoSuchAlgorithmException, IOException
+    @Override
+    public List<String> getMembers(Map<String, String> profileConfiguration, String mailingList)
+        throws MailingListException
     {
-        return MessageFormat.format(this.paths.get(method), URLEncoder.encode(domain, "UTF8"),
-            URLEncoder.encode(name, "UTF8"), URLEncoder.encode(email, "UTF8"));
+        return getMembers(profileConfiguration, mailingList, null);
+    }
+
+    public List<String> getMembers(Map<String, String> profileConfiguration, String mailingList,
+        Map<String, Object> body) throws MailingListException
+    {
+        try {
+            return exec(profileConfiguration, mailingList, null, METHOD_GET, body);
+        } catch (Exception e) {
+            throw new MailingListException("Failed to get members", e);
+        }
+    }
+
+    protected String getPath(Map<String, String> profileConfiguration, String method, String domain, String name,
+        String email) throws UnsupportedEncodingException, NoSuchAlgorithmException, IOException, MailingListException
+    {
+        return MessageFormat.format(this.paths.get(method), encode(domain), encode(name), encode(email));
+    }
+
+    protected String encode(String str) throws UnsupportedEncodingException
+    {
+        return str != null ? URLEncoder.encode(str, "UTF8") : null;
     }
 
     protected <T> T exec(Map<String, String> profileConfiguration, String mailingList, String email, String method,
-        Map<String, Object> body) throws NoSuchAlgorithmException, IOException
+        Map<String, Object> body) throws NoSuchAlgorithmException, IOException, MailingListException
     {
         // Extract mailing list domain and name
         Matcher matcher = MAIL_REGEX.matcher(mailingList);
@@ -101,12 +122,12 @@ public abstract class AbstractOVHMailingListConnector implements MailingListConn
     }
 
     protected <T> T exec(Map<String, String> profileConfiguration, String listDomain, String listName, String email,
-        String method, Map<String, Object> bodyMap) throws NoSuchAlgorithmException, IOException
+        String method, Map<String, Object> bodyMap) throws NoSuchAlgorithmException, IOException, MailingListException
     {
         // define base vars
         String appKey = profileConfiguration.get("appKey");
         String appSecret = profileConfiguration.get("appSecret");
-        String httpMethod = METHODS.get(method);
+        String httpMethod = this.methods.get(method);
         String consumerKey = profileConfiguration.get("consumerKey");
         String endpoint = profileConfiguration.get("endpoint");
 

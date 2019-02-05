@@ -20,6 +20,8 @@
 
 package org.xwiki.contrib.mailinglist;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -27,6 +29,9 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.script.service.ScriptService;
 
+/**
+ * @version $Id$
+ */
 @Role
 @Singleton
 @Named("mailinglist")
@@ -37,12 +42,16 @@ public class MailingListScriptService implements ScriptService
 
     public void add(String profile, String mailingList, String email) throws MailingListException
     {
-        manager.add(profile, mailingList, email);
+        this.manager.add(profile, mailingList, email);
     }
 
     public void delete(String profile, String mailingList, String email) throws MailingListException
     {
-        manager.delete(profile, mailingList, email);
+        this.manager.delete(profile, mailingList, email);
     }
 
+    public List<String> getMembers(String profile, String mailingList) throws MailingListException
+    {
+        return this.manager.getMembers(profile, mailingList);
+    }
 }

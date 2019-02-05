@@ -21,6 +21,7 @@ package org.xwiki.contrib.mailinglist.ovh.internal;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,8 @@ import org.xwiki.contrib.mailinglist.MailingListException;
 @Named("ovh-redirect")
 public class OVHRedirectMailingListConnector extends AbstractOVHMailingListConnector
 {
+    public static final String METHOD_GETOBJECT = "getobject";
+
     /**
      * Default constructor.
      */
@@ -48,7 +51,8 @@ public class OVHRedirectMailingListConnector extends AbstractOVHMailingListConne
     {
         super("/email/domain/{0}/redirection", "/email/domain/{0}/redirection/{2}");
 
-        this.paths.put(METHOD_GET, "/email/domain/{0}/redirection");
+        this.methods.put(METHOD_GETOBJECT, "GET");
+        this.paths.put(METHOD_GETOBJECT, "/email/domain/{0}/redirection/{2}");
     }
 
     @Override
@@ -69,14 +73,19 @@ public class OVHRedirectMailingListConnector extends AbstractOVHMailingListConne
 
     @Override
     protected String getPath(Map<String, String> profileConfiguration, String method, String domain, String name,
-        String email) throws NoSuchAlgorithmException, IOException
+        String email) throws NoSuchAlgorithmException, IOException, MailingListException
     {
         if (method.equals(METHOD_DELETE)) {
             // Find the id of the redirect (needed by delete)
+            String from = name + '@' + domain;
             Map<String, Object> body = new HashMap<>();
-            body.put("from", name + '@' + domain);
+            body.put("from", from);
             body.put("to", email);
             List<String> result = exec(profileConfiguration, domain, name, email, METHOD_GET, body);
+
+            if (result.isEmpty()) {
+                throw new MailingListException("No redirection exist from [" + from + "] to [" + email + "]");
+            }
 
             String id = result.get(0);
 
@@ -85,5 +94,30 @@ public class OVHRedirectMailingListConnector extends AbstractOVHMailingListConne
         } else {
             return super.getPath(profileConfiguration, method, domain, name, email);
         }
+    }
+
+    @Override
+    public List<String> getMembers(Map<String, String> profileConfiguration, String mailingList)
+        throws MailingListException
+    {
+        Map<String, Object> body = new HashMap<>();
+        body.put("from", mailingList);
+
+        List<String> ids = super.getMembers(profileConfiguration, mailingList, body);
+
+        List<String> members = new ArrayList<>(ids.size());
+        for (String id : ids) {
+            try {
+                Map<String, String> redirectionObject =
+                    exec(profileConfiguration, mailingList, id, METHOD_GETOBJECT, body);
+
+                members.add(redirectionObject.get("to"));
+            } catch (Exception e) {
+                throw new MailingListException("Failed to get member email from id", e);
+            }
+
+        }
+
+        return members;
     }
 }

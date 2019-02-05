@@ -20,6 +20,7 @@
 package org.xwiki.contrib.mailinglist.ovh.internal;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Named;

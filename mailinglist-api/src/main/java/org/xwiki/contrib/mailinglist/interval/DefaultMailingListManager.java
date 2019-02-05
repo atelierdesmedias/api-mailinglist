@@ -20,6 +20,7 @@
 package org.xwiki.contrib.mailinglist.interval;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -33,11 +34,13 @@ import org.xwiki.contrib.mailinglist.MailingListConnector;
 import org.xwiki.contrib.mailinglist.MailingListException;
 import org.xwiki.contrib.mailinglist.MailingListManager;
 
+/**
+ * @version $Id$
+ */
 @Component
 @Singleton
 public class DefaultMailingListManager implements MailingListManager
 {
-
     @Inject
     private ConfigurationSource configuration;
 
@@ -56,10 +59,6 @@ public class DefaultMailingListManager implements MailingListManager
             }
         }
 
-        System.out.println(profile);
-        System.out.println(profileConfiguration);
-        System.out.println(this.configuration.getKeys());
-        
         return profileConfiguration;
     }
 
@@ -80,7 +79,6 @@ public class DefaultMailingListManager implements MailingListManager
     @Override
     public void add(String profile, String mailingList, String email) throws MailingListException
     {
-
         Map<String, String> profileConfiguration = createConfiguration(profile);
 
         MailingListConnector connector = getConnector(profileConfiguration);
@@ -91,13 +89,20 @@ public class DefaultMailingListManager implements MailingListManager
     @Override
     public void delete(String profile, String mailingList, String email) throws MailingListException
     {
-
         Map<String, String> profileConfiguration = createConfiguration(profile);
 
         MailingListConnector connector = getConnector(profileConfiguration);
 
         connector.delete(profileConfiguration, mailingList, email);
-
     }
 
+    @Override
+    public List<String> getMembers(String profile, String mailingList) throws MailingListException
+    {
+        Map<String, String> profileConfiguration = createConfiguration(profile);
+
+        MailingListConnector connector = getConnector(profileConfiguration);
+
+        return connector.getMembers(profileConfiguration, mailingList);
+    }
 }
