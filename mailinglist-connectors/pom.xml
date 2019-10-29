@@ -28,7 +28,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>mailinglist-connectors</artifactId>
-  <version>1.0-SNAPSHOT</version>
+
   <name>Mailing list - Connectors</name>
   <description>Mailing list connectors</description>
   <packaging>pom</packaging>
